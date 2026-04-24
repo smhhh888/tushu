@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生成APP图标</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+        }
+        h1 {
+            text-align: center;
+            color: #1890ff;
+        }
+        .icon-preview {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        .icon-box {
+            text-align: center;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            border-radius: 20px;
+        }
+        .instructions {
+            background: #e6f7ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>图书管理系统 - APP图标生成</h1>
+        
+        <div class="icon-preview">
+            <div class="icon-box">
+                <canvas id="icon192" width="192" height="192"></canvas>
+                <p>192x192 像素</p>
+            </div>
+            <div class="icon-box">
+                <canvas id="icon512" width="512" height="512"></canvas>
+                <p>512x512 像素</p>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <strong>下载图标的步骤：</strong>
+            <ol>
+                <li>右键点击上方的图标图片</li>
+                <li>选择"图片另存为..."</li>
+                <li>192x192的图标保存为 <strong>icon-192.png</strong></li>
+                <li>512x512的图标保存为 <strong>icon-512.png</strong></li>
+                <li>将保存的图标文件放在与 index.html 相同的文件夹中</li>
+            </ol>
+        </div>
+    </div>
+    
+    <script>
+        function drawIcon(canvasId, size) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            
+            // 背景渐变
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#1890ff');
+            gradient.addColorStop(1, '#096dd9');
+            
+            // 绘制圆角矩形背景
+            const radius = size * 0.15;
+            ctx.beginPath();
+            ctx.moveTo(radius, 0);
+            ctx.lineTo(size - radius, 0);
+            ctx.quadraticCurveTo(size, 0, size, radius);
+            ctx.lineTo(size, size - radius);
+            ctx.quadraticCurveTo(size, size, size - radius, size);
+            ctx.lineTo(radius, size);
+            ctx.quadraticCurveTo(0, size, 0, size - radius);
+            ctx.lineTo(0, radius);
+            ctx.quadraticCurveTo(0, 0, radius, 0);
+            ctx.closePath();
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            // 绘制书本图标
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = size * 0.02;
+            
+            const bookWidth = size * 0.5;
+            const bookHeight = size * 0.6;
+            const bookX = (size - bookWidth) / 2;
+            const bookY = (size - bookHeight) / 2;
+            
+            // 左边书页
+            ctx.beginPath();
+            ctx.moveTo(size / 2, bookY);
+            ctx.lineTo(bookX, bookY + size * 0.05);
+            ctx.lineTo(bookX, bookY + bookHeight);
+            ctx.lineTo(size / 2, bookY + bookHeight - size * 0.05);
+            ctx.closePath();
+            ctx.fill();
+            
+            // 右边书页
+            ctx.beginPath();
+            ctx.moveTo(size / 2, bookY);
+            ctx.lineTo(bookX + bookWidth, bookY + size * 0.05);
+            ctx.lineTo(bookX + bookWidth, bookY + bookHeight);
+            ctx.lineTo(size / 2, bookY + bookHeight - size * 0.05);
+            ctx.closePath();
+            ctx.fill();
+            
+            // 书脊
+            ctx.beginPath();
+            ctx.moveTo(size / 2, bookY);
+            ctx.lineTo(size / 2, bookY + bookHeight - size * 0.05);
+            ctx.stroke();
+            
+            // 书页线条
+            ctx.strokeStyle = '#1890ff';
+            ctx.lineWidth = size * 0.01;
+            
+            // 左边线条
+            for (let i = 1; i <= 4; i++) {
+                ctx.beginPath();
+                ctx.moveTo(bookX + size * 0.05, bookY + size * 0.1 * i);
+                ctx.lineTo(size / 2 - size * 0.03, bookY + size * 0.1 * i);
+                ctx.stroke();
+            }
+            
+            // 右边线条
+            for (let i = 1; i <= 4; i++) {
+                ctx.beginPath();
+                ctx.moveTo(size / 2 + size * 0.03, bookY + size * 0.1 * i);
+                ctx.lineTo(bookX + bookWidth - size * 0.05, bookY + size * 0.1 * i);
+                ctx.stroke();
+            }
+        }
+        
+        // 生成两个尺寸的图标
+        drawIcon('icon192', 192);
+        drawIcon('icon512', 512);
+    </script>
+</body>
+</html>

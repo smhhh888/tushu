@@ -1,0 +1,24 @@
+{
+    "name": "图书管理系统",
+    "short_name": "图书管理",
+    "description": "一个简单实用的图书管理应用，支持录入、搜索和编辑图书信息",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#f0f2f5",
+    "theme_color": "#1890ff",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

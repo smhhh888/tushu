@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图书管理系统</title>
+    
+    <!-- ==================== PWA配置 ==================== -->
+    <!-- PWA（渐进式Web应用）配置，让网页可以像APP一样安装到手机 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1890ff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="图书管理">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <!-- ==================== CSS样式部分 ==================== -->
+    <!-- CSS负责控制网页的外观和布局，下面定义了各个元素的样式 -->
+    <style>
+        /* 重置所有元素的默认边距和内边距，使用border-box盒模型 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* 设置整个页面的基本样式：字体、背景色、文字颜色 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        
+        /* 主容器样式：限制最大宽度、居中显示、白色背景、圆角、阴影效果 */
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* 一级标题样式：居中、底部边距、蓝色 */
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #1890ff;
+        }
+        
+        /* 表单区域样式：底部边距、内边距、边框、圆角、浅灰背景 */
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        
+        /* 表单组样式：每个输入框和标签的组合，底部边距 */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        /* 标签样式：块级显示、底部边距、加粗 */
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        /* 文本输入框样式：全宽、内边距、边框、圆角、字体大小 */
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        /* 文本输入框获得焦点时的样式：蓝色边框、发光效果 */
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #1890ff;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+        }
+        
+        /* 按钮组样式：弹性布局、按钮间距 */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        /* 按钮基本样式：内边距、无边框、圆角、字体大小、鼠标指针、过渡动画 */
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        /* 主要按钮样式：蓝色背景、白色文字 */
+        .btn-primary {
+            background-color: #1890ff;
+            color: white;
+        }
+        
+        /* 主要按钮悬停样式：浅蓝色背景 */
+        .btn-primary:hover {
+            background-color: #40a9ff;
+        }
+        
+        /* 次要按钮样式：绿色背景、白色文字 */
+        .btn-secondary {
+            background-color: #52c41a;
+            color: white;
+        }
+        
+        /* 次要按钮悬停样式：浅绿色背景 */
+        .btn-secondary:hover {
+            background-color: #73d13d;
+        }
+        
+        /* 危险按钮样式：红色背景、白色文字（用于删除操作） */
+        .btn-danger {
+            background-color: #ff4d4f;
+            color: white;
+        }
+        
+        /* 危险按钮悬停样式：浅红色背景 */
+        .btn-danger:hover {
+            background-color: #ff7875;
+        }
+        
+        /* 搜索区域样式 */
+        .search-section {
+            margin-bottom: 30px;
+        }
+        
+        /* 搜索框样式：弹性布局、元素间距 */
+        .search-box {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* 搜索框中的输入框样式：占据剩余空间 */
+        .search-box input {
+            flex: 1;
+        }
+        
+        /* 图书列表区域样式 */
+        .book-list {
+            margin-top: 20px;
+        }
+        
+        /* 单个图书项样式：弹性布局、两端对齐、内边距、边框、圆角、白色背景 */
+        .book-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #e8e8e8;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            background-color: white;
+        }
+        
+        /* 图书信息区域样式：占据剩余空间 */
+        .book-info {
+            flex: 1;
+        }
+        
+        /* 图书标题样式：底部边距、蓝色 */
+        .book-info h3 {
+            margin-bottom: 5px;
+            color: #1890ff;
+        }
+        
+        /* 图书详细信息样式：上下边距、字体大小、灰色文字 */
+        .book-info p {
+            margin: 3px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* 图书操作按钮区域样式：弹性布局、按钮间距 */
+        .book-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* 空状态提示样式：居中、内边距、灰色文字 */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        /* 成功消息样式：绿色背景、边框、绿色文字、默认隐藏 */
+        .success-message {
+            background-color: #f6ffed;
+            border: 1px solid #b7eb8f;
+            color: #52c41a;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- ==================== HTML页面结构部分 ==================== -->
+    <!-- HTML负责定义网页的内容和结构 -->
+    
+    <!-- 主容器：包含所有页面内容 -->
+    <div class="container">
+        <!-- 页面标题 -->
+        <h1>图书管理系统</h1>
+        
+        <!-- 成功消息提示：操作成功后显示 -->
+        <div class="success-message" id="successMessage">操作成功！</div>
+        
+        <!-- 图书录入/编辑表单区域 -->
+        <div class="form-section">
+            <h2>图书信息</h2>
+            <!-- 表单：用于输入图书信息 -->
+            <form id="bookForm">
+                <!-- 隐藏字段：存储正在编辑的图书ID（新增时为空） -->
+                <input type="hidden" id="bookId">
+                
+                <!-- 书名输入框：required表示必填项 -->
+                <div class="form-group">
+                    <label for="bookTitle">书名</label>
+                    <input type="text" id="bookTitle" required>
+                </div>
+                
+                <!-- 位置输入框：必填项 -->
+                <div class="form-group">
+                    <label for="bookLocation">位置</label>
+                    <input type="text" id="bookLocation" required>
+                </div>
+                
+                <!-- 编号输入框：必填项 -->
+                <div class="form-group">
+                    <label for="bookNumber">编号</label>
+                    <input type="text" id="bookNumber" required>
+                </div>
+                
+                <!-- 数量输入框：必填项 -->
+                <div class="form-group">
+                    <label for="bookQuantity">数量</label>
+                    <input type="number" id="bookQuantity" min="1" required>
+                </div>
+                
+                <!-- 作者输入框：选填项 -->
+                <div class="form-group">
+                    <label for="bookAuthor">作者</label>
+                    <input type="text" id="bookAuthor">
+                </div>
+                
+                <!-- 出版社输入框：选填项 -->
+                <div class="form-group">
+                    <label for="bookPublisher">出版社</label>
+                    <input type="text" id="bookPublisher">
+                </div>
+                
+                <!-- 操作按钮组 -->
+                <div class="button-group">
+                    <!-- 提交按钮：保存图书信息 -->
+                    <button type="submit" class="btn-primary">保存</button>
+                    <!-- 清空按钮：清空表单内容 -->
+                    <button type="button" class="btn-secondary" id="clearForm">清空</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- 搜索功能区域 -->
+        <div class="search-section">
+            <h2>搜索图书</h2>
+            <div class="search-box">
+                <!-- 搜索输入框：输入关键词进行搜索 -->
+                <input type="text" id="searchInput" placeholder="输入书名、编号、位置进行搜索...">
+                <!-- 搜索按钮：执行搜索操作 -->
+                <button class="btn-primary" id="searchButton">搜索</button>
+                <!-- 清空搜索按钮：清除搜索结果，显示全部图书 -->
+                <button class="btn-secondary" id="clearSearch">清空搜索</button>
+            </div>
+        </div>
+        
+        <!-- 图书列表区域：动态显示所有图书 -->
+        <div class="book-list">
+            <h2>图书列表</h2>
+            <!-- 图书列表容器：由JavaScript动态填充内容 -->
+            <div id="bookList"></div>
+        </div>
+    </div>
+    
+    <!-- ==================== JavaScript脚本部分 ==================== -->
+    <!-- JavaScript负责实现网页的交互功能 -->
+    <script>
+        // ==================== 数据初始化 ====================
+        
+        // 从浏览器的本地存储中读取已保存的图书数据
+        // localStorage.getItem('books') 获取存储的数据（字符串格式）
+        // JSON.parse() 将字符串转换为JavaScript数组
+        // || [] 表示如果没有数据，则使用空数组
+        let books = JSON.parse(localStorage.getItem('books')) || [];
+        
+        // 当前正在编辑的图书ID（null表示新增模式）
+        let currentEditId = null;
+        
+        // ==================== 工具函数 ====================
+        
+        /**
+         * 显示成功消息提示
+         * 功能：在页面顶部显示"操作成功"的绿色提示框，2秒后自动消失
+         */
+        function showSuccessMessage() {
+            // 获取成功消息元素
+            const message = document.getElementById('successMessage');
+            // 显示消息
+            message.style.display = 'block';
+            // 设置2秒后自动隐藏
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 2000);
+        }
+        
+        /**
+         * 保存图书数据到本地存储
+         * 功能：将当前的图书数组保存到浏览器的本地存储中
+         * 这样即使关闭浏览器，数据也不会丢失
+         */
+        function saveBooks() {
+            // JSON.stringify() 将数组转换为字符串格式
+            // localStorage.setItem() 将数据保存到本地存储
+            localStorage.setItem('books', JSON.stringify(books));
+        }
+        
+        // ==================== 核心功能函数 ====================
+        
+        /**
+         * 渲染（显示）图书列表
+         * 功能：将图书数据转换为HTML元素并显示在页面上
+         * @param filteredBooks - 要显示的图书数组，默认为全部图书
+         */
+        function renderBooks(filteredBooks = books) {
+            // 获取图书列表容器元素
+            const bookList = document.getElementById('bookList');
+            
+            // 如果没有图书数据，显示空状态提示
+            if (filteredBooks.length === 0) {
+                bookList.innerHTML = '<div class="empty-state">暂无图书数据</div>';
+                return;
+            }
+            
+            // 使用map()方法遍历每本图书，生成对应的HTML代码
+            // 模板字符串（`...`）用于创建多行HTML
+            bookList.innerHTML = filteredBooks.map(book => `
+                <div class="book-item">
+                    <!-- 图书信息区域 -->
+                    <div class="book-info">
+                        <h3>${book.title}</h3>
+                        <p>编号: ${book.number}</p>
+                        <p>位置: ${book.location}</p>
+                        <p>数量: ${book.quantity}</p>
+                        <p>作者: ${book.author || '未知'}</p>
+                        <p>出版社: ${book.publisher || '未知'}</p>
+                    </div>
+                    <!-- 操作按钮区域 -->
+                    <div class="book-actions">
+                        <!-- 编辑按钮：点击时调用editBook函数 -->
+                        <button class="btn-secondary" onclick="editBook('${book.id}')">编辑</button>
+                        <!-- 删除按钮：点击时调用deleteBook函数 -->
+                        <button class="btn-danger" onclick="deleteBook('${book.id}')">删除</button>
+                    </div>
+                </div>
+            `).join(''); // join('')将数组拼接成一个字符串
+        }
+        
+        // ==================== 表单提交处理 ====================
+        
+        /**
+         * 监听表单提交事件
+         * 功能：当用户点击"保存"按钮时，添加新图书或更新现有图书
+         */
+        document.getElementById('bookForm').addEventListener('submit', function(e) {
+            // 阻止表单默认提交行为（防止页面刷新）
+            e.preventDefault();
+            
+            // 获取表单中各个输入框的值
+            const title = document.getElementById('bookTitle').value;      // 书名
+            const location = document.getElementById('bookLocation').value; // 位置
+            const number = document.getElementById('bookNumber').value;     // 书号
+            const quantity = document.getElementById('bookQuantity').value; // 数量
+            const author = document.getElementById('bookAuthor').value;     // 作者
+            const publisher = document.getElementById('bookPublisher').value; // 出版社
+            const bookId = document.getElementById('bookId').value;         // 图书ID（编辑时使用）
+            
+            // 判断是编辑模式还是新增模式
+            if (bookId) {
+                // ===== 编辑模式：更新现有图书 =====
+                // 在数组中找到对应图书的索引位置
+                const index = books.findIndex(book => book.id === bookId);
+                if (index !== -1) {
+                    // 更新图书信息（保留原有的id）
+                    books[index] = {
+                        ...books[index], // 保留原有属性
+                        title,           // 更新书名
+                        location,        // 更新位置
+                        number,          // 更新书号
+                        quantity,        // 更新数量
+                        author,          // 更新作者
+                        publisher        // 更新出版社
+                    };
+                }
+            } else {
+                // ===== 新增模式：添加新图书 =====
+                // 创建新的图书对象
+                const newBook = {
+                    id: Date.now().toString(), // 使用当前时间戳作为唯一ID
+                    title,                     // 书名
+                    location,                  // 位置
+                    number,                    // 书号
+                    quantity,                  // 数量
+                    author,                    // 作者
+                    publisher                  // 出版社
+                };
+                // 将新图书添加到数组末尾
+                books.push(newBook);
+            }
+            
+            // 保存数据到本地存储
+            saveBooks();
+            // 刷新图书列表显示
+            renderBooks();
+            // 清空表单内容
+            clearForm();
+            // 显示成功消息
+            showSuccessMessage();
+        });
+        
+        // ==================== 其他功能函数 ====================
+        
+        /**
+         * 清空表单内容
+         * 功能：重置所有输入框，退出编辑模式
+         */
+        function clearForm() {
+            // 重置表单所有输入框
+            document.getElementById('bookForm').reset();
+            // 清空隐藏的图书ID字段
+            document.getElementById('bookId').value = '';
+            // 重置编辑状态
+            currentEditId = null;
+        }
+        
+        /**
+         * 编辑图书
+         * 功能：将选中图书的信息填充到表单中，进入编辑模式
+         * @param id - 要编辑的图书ID
+         */
+        function editBook(id) {
+            // 在数组中找到对应的图书对象
+            const book = books.find(book => book.id === id);
+            if (book) {
+                // 将图书信息填充到表单各个输入框
+                document.getElementById('bookId').value = book.id;           // 设置ID（用于识别编辑模式）
+                document.getElementById('bookTitle').value = book.title;     // 填充书名
+                document.getElementById('bookLocation').value = book.location; // 填充位置
+                document.getElementById('bookNumber').value = book.number;   // 填充书号
+                document.getElementById('bookQuantity').value = book.quantity; // 填充数量
+                document.getElementById('bookAuthor').value = book.author || ''; // 填充作者
+                document.getElementById('bookPublisher').value = book.publisher || ''; // 填充出版社
+                // 记录当前编辑的图书ID
+                currentEditId = id;
+            }
+        }
+        
+        /**
+         * 删除图书
+         * 功能：从数组中移除指定的图书
+         * @param id - 要删除的图书ID
+         */
+        function deleteBook(id) {
+            // 弹出确认对话框，用户确认后才执行删除
+            if (confirm('确定要删除这本书吗？')) {
+                // 使用filter()方法过滤掉要删除的图书
+                // 保留所有ID不等于指定ID的图书
+                books = books.filter(book => book.id !== id);
+                // 保存更新后的数据
+                saveBooks();
+                // 刷新图书列表显示
+                renderBooks();
+                // 显示成功消息
+                showSuccessMessage();
+            }
+        }
+        
+        // ==================== 搜索功能 ====================
+        
+        /**
+         * 监听搜索按钮点击事件
+         * 功能：根据关键词搜索图书并显示匹配结果
+         */
+        document.getElementById('searchButton').addEventListener('click', function() {
+            // 获取搜索关键词并转换为小写（实现不区分大小写的搜索）
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            // 使用filter()方法筛选匹配的图书
+            const filteredBooks = books.filter(book => 
+                // 检查书名是否包含关键词
+                book.title.toLowerCase().includes(searchTerm) ||
+                // 检查编号是否包含关键词
+                book.number.toLowerCase().includes(searchTerm) ||
+                // 检查位置是否包含关键词
+                book.location.toLowerCase().includes(searchTerm) ||
+                // 检查作者是否包含关键词（需要先判断作者是否存在）
+                (book.author && book.author.toLowerCase().includes(searchTerm)) ||
+                // 检查出版社是否包含关键词（需要先判断出版社是否存在）
+                (book.publisher && book.publisher.toLowerCase().includes(searchTerm))
+            );
+            
+            // 显示筛选后的图书列表
+            renderBooks(filteredBooks);
+        });
+        
+        /**
+         * 监听清空搜索按钮点击事件
+         * 功能：清除搜索条件，显示全部图书
+         */
+        document.getElementById('clearSearch').addEventListener('click', function() {
+            // 清空搜索输入框
+            document.getElementById('searchInput').value = '';
+            // 显示全部图书
+            renderBooks();
+        });
+        
+        /**
+         * 监听清空表单按钮点击事件
+         * 功能：清空表单内容，退出编辑模式
+         */
+        document.getElementById('clearForm').addEventListener('click', clearForm);
+        
+        // ==================== 页面初始化 ====================
+        
+        // 页面加载完成后，立即渲染图书列表
+        // 这样用户打开页面就能看到之前保存的图书数据
+        renderBooks();
+        
+        // ==================== PWA Service Worker注册 ====================
+        // 注册Service Worker，实现离线访问功能
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(function(registration) {
+                        console.log('Service Worker 注册成功:', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('Service Worker 注册失败:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
